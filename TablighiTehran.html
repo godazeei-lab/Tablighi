@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مشارکت در طرح تربیتی</title>
+    
+    <!-- کتابخانه‌های React و ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- کتابخانه Babel برای ترجمه کدهای JSX در مرورگر -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Tailwind CSS برای استایل‌دهی -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- تنظیمات رنگ‌های سفارشی (تم قهوه‌ای سوخته) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brown: {
+                            50: '#fdf8f6',
+                            100: '#f2e8e5',
+                            200: '#eaddd7',
+                            300: '#e0cec7',
+                            400: '#d2bab0',
+                            500: '#a37a6a',
+                            600: '#8b5a48',
+                            700: '#693c2c',
+                            800: '#4a281c', 
+                            900: '#2d160e',
+                        },
+                        gold: {
+                            500: '#d4af37',
+                            600: '#c5a028'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Tahoma', 'Arial', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f2e8e5; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #eaddd7; }
+        ::-webkit-scrollbar-thumb { background: #8b5a48; border-radius: 4px; }
+    </style>
+</head>
+<body className="antialiased text-brown-900 min-h-screen flex items-center justify-center p-4">
+
+    <div id="root" className="w-full max-w-md"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            // اطلاعات خود را دقیقاً جایگزین کلمات فارسی داخل کوتیشن‌ها کنید:
+            const cardNumber = "6037991794662266";
+            const cardOwnerName = "روح الله بهرامی نیکو";
+            const phoneNumber = "09395202963";
+
+            // متغیرهای اصلی سیستم (تعداد سهم به 100 تغییر یافت)
+            const totalShares = 100;
+            const scriptUrl = "https://script.google.com/macros/s/AKfycbycDJnwEE8nEcFQfPHl8mm-vvTsORzwecky0HSSg7cLOHYskGjq197XfoiyeMzScCOm/exec";
+            
+            // State ها
+            const [filledShares, setFilledShares] = useState(0);
+            const [selectedShares, setSelectedShares] = useState(1);
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            const [isLoading, setIsLoading] = useState(true);
+
+            // دریافت تعداد سهم‌ها هنگام باز شدن سایت
+            useEffect(() => {
+                fetch(scriptUrl)
+                    .then(response => response.text())
+                    .then(data => {
+                        const count = parseInt(data);
+                        if (!isNaN(count)) {
+                            setFilledShares(count);
+                        }
+                        setIsLoading(false);
+                    })
+                    .catch(error => {
+                        console.error("خطا در دریافت اطلاعات:", error);
+                        setIsLoading(false);
+                    });
+            }, []);
+
+            const handleIncrement = () => {
+                if (filledShares + selectedShares < totalShares) {
+                    setSelectedShares(prev => prev + 1);
+                }
+            };
+
+            const handleDecrement = () => {
+                if (selectedShares > 1) {
+                    setSelectedShares(prev => prev - 1);
+                }
+            };
+
+            const handleSubmit = () => {
+                fetch(`${scriptUrl}?add=${selectedShares}`, { mode: 'no-cors' })
+                    .catch(error => console.error("خطا در ثبت:", error));
+                
+                setFilledShares(prev => prev + selectedShares);
+                setIsModalOpen(true);
+            };
+
+            const copyCardNumber = () => {
+                const pureNumber = cardNumber.replace(/-/g, '');
+                navigator.clipboard.writeText(pureNumber).then(() => {
+                    alert('شماره کارت در کلیپ‌بورد کپی شد.');
+                });
+            };
+
+            const progressPercentage = Math.min((filledShares / totalShares) * 100, 100);
+
+            return (
+                <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-brown-200">
+                    
+                    {/* هدر */}
+                    <div className="bg-brown-800 text-brown-50 p-6 text-center border-b-4 border-gold-500">
+                        <h1 className="text-2xl font-bold mb-2">مشارکت در طرح تربیتی</h1>
+                        <p className="text-brown-200 text-sm mb-4">همراهی شما، روشن‌بخش مسیر نوجوانان است</p>
+                        
+                        {/* نشان تاریخ مهلت */}
+                        <div className="inline-block bg-gold-500 text-brown-900 px-4 py-1.5 rounded-full text-xs font-bold shadow-sm">
+                            مهلت مشارکت تا ۱۹ آبان ۱۴۰۵
+                        </div>
+                    </div>
+
+                    <div className="p-6">
+                        
+                        {/* نوار پیشرفت */}
+                        <div className="mb-8">
+                            <div className="flex justify-between text-sm mb-2 text-brown-700 font-bold">
+                                <span>سهم‌های تکمیل‌شده: {isLoading ? '...' : filledShares}</span>
+                                <span>ظرفیت کل: {totalShares} سهم</span>
+                            </div>
+                            <div className="w-full bg-brown-100 rounded-full h-4 relative overflow-hidden shadow-inner">
+                                <div 
+                                    className="bg-brown-600 h-4 rounded-full transition-all duration-1000 ease-out"
+                                    style={{ width: `${progressPercentage}%` }}
+                                ></div>
+                            </div>
+                        </div>
+
+                        {/* انتخاب سهم */}
+                        <div className="bg-brown-50 rounded-xl p-4 mb-6 border border-brown-100 text-center">
+                            <p className="text-brown-800 font-bold mb-3">تعداد سهم مشارکت خود را انتخاب کنید</p>
+                            <p className="text-xs text-brown-600 font-bold mb-4 bg-brown-200 inline-block px-3 py-1 rounded-lg">(هر سهم ۳۰ هزار تومان)</p>
+                            
+                            <div className="flex items-center justify-center space-x-4 space-x-reverse mt-2">
+                                <button 
+                                    onClick={handleIncrement}
+                                    className="w-12 h-12 rounded-full bg-brown-200 hover:bg-brown-300 text-brown-800 text-2xl font-bold flex items-center justify-center transition-colors shadow-sm"
+                                >
+                                    +
+                                </button>
+                                
+                                <div className="w-24 text-center">
+                                    <span className="text-3xl font-bold text-brown-900">{selectedShares}</span>
+                                    <span className="block text-sm text-brown-600 mt-1">سهم</span>
+                                </div>
+                                
+                                <button 
+                                    onClick={handleDecrement}
+                                    className="w-12 h-12 rounded-full bg-brown-200 hover:bg-brown-300 text-brown-800 text-2xl font-bold flex items-center justify-center transition-colors shadow-sm"
+                                >
+                                    -
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* دکمه ثبت */}
+                        <button 
+                            onClick={handleSubmit}
+                            disabled={isLoading}
+                            className="w-full bg-brown-800 hover:bg-brown-900 text-white font-bold py-4 rounded-xl shadow-lg transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            ثبت مشارکت
+                        </button>
+                    </div>
+
+                    {/* پنجره پاپ‌آپ (Modal) */}
+                    {isModalOpen && (
+                        <div className="fixed inset-0 bg-brown-900 bg-opacity-70 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+                            <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl relative animate-[fadeIn_0.3s_ease-out]">
+                                <h3 className="text-xl font-bold text-brown-800 mb-4 text-center border-b pb-3">اطلاعات واریز</h3>
+                                
+                                <div className="bg-brown-50 p-4 rounded-xl mb-4 border border-brown-200">
+                                    <p className="text-center text-sm text-brown-600 mb-2">شماره کارت به نام {cardOwnerName}</p>
+                                    <p className="text-center text-xl font-bold text-brown-900 tracking-widest" dir="ltr">{cardNumber}</p>
+                                </div>
+                                
+                                <button 
+                                    onClick={copyCardNumber}
+                                    className="w-full bg-brown-200 hover:bg-brown-300 text-brown-800 font-bold py-3 rounded-xl mb-6 transition-colors flex justify-center items-center gap-2"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                    کپی شماره کارت
+                                </button>
+                                
+                                <div className="text-center bg-gold-50 p-3 rounded-lg border border-gold-500">
+                                    <p className="text-brown-800 text-sm font-bold leading-relaxed">
+                                        برای ارتباط، با این شماره تماس حاصل فرمایید:<br/>
+                                        <span className="text-lg block mt-2 text-brown-900">{phoneNumber}</span>
+                                    </p>
+                                </div>
+                                
+                                <button 
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="w-full text-brown-500 hover:text-brown-800 font-bold py-2 mt-4 transition-colors"
+                                >
+                                    بستن صفحه
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
